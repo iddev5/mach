@@ -208,8 +208,8 @@ fn linkGLFWDependencies(b: *Builder, step: *std.build.LibExeObjStep, options: Op
             }
         },
         .macos => {
-            step.linkFramework("IOKit");
-            step.linkFramework("CoreFoundation");
+            // step.linkFramework("IOKit");
+            // step.linkFramework("CoreFoundation");
             if (options.metal) {
                 step.linkFramework("Metal");
             }
