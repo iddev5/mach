@@ -7,7 +7,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        project: ['glfw', '.']
+        project: ['glfw']
     steps:
       - name: Checkout
         uses: actions/checkout@v2
