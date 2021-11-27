@@ -49,7 +49,7 @@ pub const Options = struct {
     /// you from including headers, libraries, etc. from outside the SDK generally. However, it can
     /// be useful in order to identify which libraries, headers, frameworks, etc. may be missing in
     /// your SDK for cross compilation.
-    set_sysroot: bool = false,
+    set_sysroot: bool = true,
 };
 
 pub fn include(b: *Builder, step: *std.build.LibExeObjStep, options: Options) void {
