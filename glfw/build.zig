@@ -48,7 +48,7 @@ pub fn link(b: *Builder, step: *std.build.LibExeObjStep, options: Options) void 
 }
 
 fn buildLibrary(b: *Builder, step: *std.build.LibExeObjStep, options: Options) *std.build.LibExeObjStep {
-    const main_abs = std.fs.path.join(b.allocator, &.{ thisDir(), "src/main.zig" }) catch unreachable;
+    const main_abs = std.fs.path.join(b.allocator, &.{ thisDir(), "src/empty.zig" }) catch unreachable;
     const lib = b.addStaticLibrary("glfw", main_abs);
     lib.setBuildMode(step.build_mode);
     lib.setTarget(step.target);
