@@ -1,3 +1,0 @@
-[submodule "gpu/libs/dawn"]
-	path = gpu/libs/dawn
-	url = https://github.com/hexops/dawn
