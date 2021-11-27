@@ -210,16 +210,16 @@ fn linkGLFWDependencies(b: *Builder, step: *std.build.LibExeObjStep, options: Op
         .macos => {
             // step.linkFramework("IOKit");
             // step.linkFramework("CoreFoundation");
-            if (options.metal) {
-                step.linkFramework("Metal");
-            }
-            if (options.opengl) {
-                step.linkFramework("OpenGL");
-            }
-            step.linkSystemLibrary("objc");
-            step.linkFramework("AppKit");
-            step.linkFramework("CoreServices");
-            step.linkFramework("CoreGraphics");
+            // if (options.metal) {
+            //     step.linkFramework("Metal");
+            // }
+            // if (options.opengl) {
+            //     step.linkFramework("OpenGL");
+            // }
+            // step.linkSystemLibrary("objc");
+            // step.linkFramework("AppKit");
+            // step.linkFramework("CoreServices");
+            // step.linkFramework("CoreGraphics");
             step.linkFramework("Foundation");
         },
         else => {
