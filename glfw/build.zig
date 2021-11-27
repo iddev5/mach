@@ -7,7 +7,7 @@ pub fn build(b: *Builder) void {
     const mode = b.standardReleaseOptions();
     const target = b.standardTargetOptions(.{});
 
-    const main_tests = b.addTest("src/main.zig");
+    const main_tests = b.addTest("src/empty.zig");
     main_tests.setBuildMode(mode);
     main_tests.setTarget(target);
     link(b, main_tests, .{});
