@@ -108,7 +108,7 @@ fn buildLibrary(b: *Builder, step: *std.build.LibExeObjStep, options: Options) *
                 const abs_path = std.fs.path.join(b.allocator, &.{ thisDir(), path }) catch unreachable;
                 sources.append(abs_path) catch unreachable;
             }
-            lib.addCSourceFiles(sources.items, &.{"-D_GLFW_COCOA"});
+            // lib.addCSourceFiles(sources.items, &.{"-D_GLFW_COCOA"});
         },
         else => {
             // TODO(future): for now, Linux must be built with glibc, not musl:
