@@ -220,7 +220,7 @@ fn linkGLFWDependencies(b: *Builder, step: *std.build.LibExeObjStep, options: Op
             // step.linkFramework("AppKit");
             // step.linkFramework("CoreServices");
             // step.linkFramework("CoreGraphics");
-            step.linkFramework("Foundation");
+            // step.linkFramework("Foundation");
         },
         else => {
             // Assume Linux-like
