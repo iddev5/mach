@@ -53,7 +53,7 @@ fn buildLibrary(b: *Builder, step: *std.build.LibExeObjStep, options: Options) *
     lib.setBuildMode(step.build_mode);
     lib.setTarget(step.target);
 
-    // system_sdk.include(b, step, .{});
+    system_sdk.include(b, step, .{});
     const target = (std.zig.system.NativeTargetInfo.detect(b.allocator, step.target) catch unreachable).target;
     switch (target.os.tag) {
         .windows => {
@@ -195,7 +195,7 @@ fn linkGLFWDependencies(b: *Builder, step: *std.build.LibExeObjStep, options: Op
     step.addIncludeDir(vulkan_include_dir);
 
     step.linkLibC();
-    // system_sdk.include(b, step, .{});
+    system_sdk.include(b, step, .{});
     const target = (std.zig.system.NativeTargetInfo.detect(b.allocator, step.target) catch unreachable).target;
     switch (target.os.tag) {
         .windows => {
