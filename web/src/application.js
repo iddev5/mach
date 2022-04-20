@@ -28,7 +28,7 @@ const web = {
 
 	webCanvasSetTitle: function(str, len) {
 		const title = len > 0 ? web.getString(str, len) : original_title;
-		web.canvas.title = title;
+		document.title = title;
 	},
 };
 
