@@ -1,14 +1,15 @@
 const std = @import("std");
 const web = @import("mach-web");
 
-export fn wasmInit() void {
+pub fn webInit() void {
     web.init(800, 600, "Demo", .{});
+    std.log.info("Demo init!", .{});
 }
 
-export fn wasmDeinit() void {
+pub fn webDeinit() void {
     web.deinit();
 }
 
-export fn wasmUpdate() bool {
+pub fn webUpdate() bool {
     return true;
 }

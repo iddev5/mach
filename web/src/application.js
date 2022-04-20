@@ -1,5 +1,6 @@
 const original_title = document.title;
 const text_decoder = new TextDecoder();
+let log_buf = "";
 
 const web = {
 	canvas: 0,
@@ -12,6 +13,19 @@ const web = {
 	getString: function(str, len) {
 		const memory = web.wasm.exports.memory.buffer;
 		return text_decoder.decode(new Uint8Array(memory, str, len));
+	},
+
+	webLogWrite: function(str, len) {
+		log_buf += web.getString(str, len);
+	},
+
+	webLogFlush: function() {
+		console.log(log_buf);
+		log_buf = "";
+	},
+
+	webPanic: function(str, len) {
+		throw Error(web.getString(str, len));
 	},
 
 	webCanvasInit: function() {

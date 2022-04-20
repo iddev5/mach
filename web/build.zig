@@ -17,10 +17,14 @@ pub fn build(b: *std.build.Builder) void {
 
     // Examples
     inline for (.{"basic"}) |example| {
-        const lib = b.addSharedLibrary("web", "examples/" ++ example ++ "/main.zig", .unversioned);
+        const lib = b.addSharedLibrary("web", "src/main.zig", .unversioned);
         lib.setBuildMode(mode);
         lib.setTarget(target);
-        lib.addPackage(web_pkg);
+        lib.addPackage(.{
+            .name = "app",
+            .path = .{ .path = "examples/" ++ example ++ "/main.zig" },
+            .dependencies = &.{web_pkg},
+        });
         lib.install();
         lib.install_step.?.dest_dir = web_install_dir;
 
