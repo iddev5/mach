@@ -47,8 +47,6 @@ pub const CoreGlfw = struct {
             .allocator = engine.allocator,
         };
 
-        core.initCallback();
-
         return core;
     }
 
@@ -405,6 +403,8 @@ pub fn main() !void {
 
     try app.init(&engine);
     defer app.deinit(&engine);
+
+    engine.core.internal.initCallback();
 
     const window = engine.core.internal.window;
     while (!window.shouldClose()) {

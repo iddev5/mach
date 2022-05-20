@@ -26,16 +26,6 @@ const App = @This();
 pub fn init(app: *App, engine: *mach.Engine) !void {
     timer = try mach.Timer.start();
 
-    engine.core.setKeyCallback(struct {
-        fn callback(_: *App, eng: *mach.Engine, key: mach.Key, action: mach.Action) void {
-            if (action == .press) {
-                switch (key) {
-                    .space => eng.core.setShouldClose(true),
-                    else => {},
-                }
-            }
-        }
-    }.callback);
     try engine.core.setSizeLimits(.{ .width = 20, .height = 20 }, .{ .width = null, .height = null });
 
     const vs_module = engine.gpu_driver.device.createShaderModule(&.{
@@ -197,6 +187,16 @@ pub fn deinit(app: *App, _: *mach.Engine) void {
 }
 
 pub fn update(app: *App, engine: *mach.Engine) !bool {
+    while (engine.core.pollEvent()) |event| {
+        switch (event) {
+            .key_press => |ev| {
+                if (ev.key == .space)
+                    engine.core.setShouldClose(true);
+            },
+            else => {},
+        }
+    }
+
     // If window is resized, recreate depth buffer otherwise we cannot use it.
     const size = engine.core.getFramebufferSize() catch unreachable; // TODO: return type inference can't handle this
     if (size.width != app.depth_size.width or size.height != app.depth_size.height) {
