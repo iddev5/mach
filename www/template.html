@@ -25,7 +25,8 @@
           instance.exports.wasmInit();
 
           let update = function() {{
-            const r = instance.exports.wasmUpdate();
+            let r = true;
+            if (mach.events.length != 0) r = instance.exports.wasmUpdate();
             if (r) requestAnimationFrame(update)
             else instance.exports.wasmDeinit();
           }};
