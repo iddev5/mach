@@ -341,6 +341,13 @@ const mach = {
   machPerfNow() {
     return performance.now();
   },
+
+  machFetchFile(str, len) {
+    const file_name = mach.getString(str, len);
+    let idx = undefined;
+    window.fetch(file_name).then(response => mach.open_fds.push(response)).finally(() => idx = mach.open_fds.length);
+    return idx;
+  },
 };
 
 export { mach };
