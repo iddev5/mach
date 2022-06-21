@@ -1,5 +1,6 @@
 const std = @import("std");
 const uri_parser = @import("uri_parser.zig");
+const FileSystem = @import("FileSystem.zig").FileSystem;
 
 const ResourceManager = @This();
 
@@ -8,12 +9,13 @@ paths: []const []const u8,
 // TODO: Use comptime hash map for resource_types
 resource_map: std.StringArrayHashMapUnmanaged(ResourceType) = .{},
 resources: std.StringHashMapUnmanaged(Resource) = .{},
-cwd: std.fs.Dir,
 context: ?*anyopaque = null,
 
+fs: FileSystem,
+
 pub fn init(allocator: std.mem.Allocator, paths: []const []const u8, resource_types: []const ResourceType) !ResourceManager {
-    var cwd = try std.fs.openDirAbsolute(try std.fs.selfExeDirPathAlloc(allocator), .{});
-    errdefer cwd.close();
+    var fs = try FileSystem.init(allocator, false);
+    errdefer fs.deinit();
 
     var resource_map: std.StringArrayHashMapUnmanaged(ResourceType) = .{};
     for (resource_types) |res| {
@@ -24,7 +26,7 @@ pub fn init(allocator: std.mem.Allocator, paths: []const []const u8, resource_ty
         .allocator = allocator,
         .paths = paths,
         .resource_map = resource_map,
-        .cwd = cwd,
+        .fs = fs,
     };
 }
 
@@ -44,23 +46,23 @@ pub fn getResource(self: *ResourceManager, uri: []const u8) !Resource {
     if (self.resources.get(uri)) |res|
         return res;
 
-    var file: ?std.fs.File = null;
+    var file: ?FileSystem.File = null;
     const uri_data = try uri_parser.parseUri(uri);
 
     for (self.paths) |path| {
-        var dir = try self.cwd.openDir(path, .{});
-        defer dir.close();
+        const full_path = try std.fs.path.join(self.allocator, &.{ path, uri_data.path });
+        defer self.allocator.free(full_path);
 
-        file = dir.openFile(uri_data.path, .{}) catch |err| switch (err) {
+        file = self.fs.fetchFile(full_path) catch |err| switch (err) {
             error.FileNotFound => continue,
-            else => return err,
+            else => |e| return e,
         };
-        errdefer file.deinit();
+        errdefer file.close();
     }
 
-    if (file) |f| {
+    if (file) |*f| {
         if (self.resource_map.get(uri_data.scheme)) |res_type| {
-            var data = try f.reader().readAllAlloc(self.allocator, std.math.maxInt(usize));
+            const data = try f.readAll(self.allocator);
             errdefer self.allocator.free(data);
 
             const resource = try res_type.load(self.context, data);
