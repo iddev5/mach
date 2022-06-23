@@ -76,7 +76,7 @@ pub fn loadResource(resource_manager: *ResourceManager, uri: []const u8) !void {
             }
         }.cb) catch |err| switch (err) {
             error.FileNotFound => continue,
-            else => |e| return e,
+            else => unreachable, //|e| return e,
         };
 
         return;

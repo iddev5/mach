@@ -341,6 +341,45 @@ const mach = {
   machPerfNow() {
     return performance.now();
   },
+
+  machFetchFileLength(str, len, ctx) {
+    const url = mach.getString(str, len);
+
+    const req = new XMLHttpRequest();
+    req.open('HEAD', url);
+    req.onreadystatechange = function() {
+        if (this.readyState == this.DONE) {
+            if (this.status == 200) {
+                var content_length = this.getResponseHeader('Content-Length');
+                mach.wasm.exports.wasmFileLenCb(ctx, content_length);
+            }
+        }
+    };
+    req.send();
+  },
+
+  machFetchFile(str, len, ctx, mem, cb) {
+    const url = mach.getString(str, len);
+
+    const req = new XMLHttpRequest();
+    req.open('GET', url);
+    req.responseType = 'arrayBuffer'
+    req.onreadystatechange = function() {
+        if (this.readyState == this.DONE) {
+            if (this.status == 206) {
+              const memory = mach.wasm.exports.memory.buffer;
+              //const strbuf = text_encoder.encode(str);
+              const strbuf = new Uint8Array(req.response);
+              const outbuf = new Uint8Array(memory, mem, strbuf.length);
+              for (let i = 0; i < strbuf.length; i += 1) {
+                outbuf[i] = strbuf[i];
+              }
+            }
+        }
+    };
+    req.send();
+
+  },
 };
 
 export { mach };

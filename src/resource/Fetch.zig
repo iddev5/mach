@@ -18,7 +18,9 @@ pub fn fetchFile(fetch: *Fetch, path: []const u8, ctx: *anyopaque, cb: fn (ctx: 
 }
 
 fn GetFetchType() type {
-    if (builtin.cpu.arch != .wasm32) return @import("fetch_native.zig").PlatformFetch;
+    if (builtin.cpu.arch == .wasm32)
+        return @import("fetch_wasm.zig").PlatformFetch;
+    return @import("fetch_native.zig").PlatformFetch;
 }
 
 fn GetFileType() type {
