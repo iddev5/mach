@@ -341,6 +341,32 @@ const mach = {
   machPerfNow() {
     return performance.now();
   },
+
+  machFetchFileLength(str, len, length, frame) {
+    const url = mach.getString(str, len);
+
+    fetch(url, { method: "HEAD" })
+      .then(response => {
+          const content_length = response.headers.get("Content-Length");
+          mach.wasm.exports.wasmFileLenCb(frame, length, content_length);
+      });
+  },
+
+  machFetchFile(str, len, mem, frame) {
+    const url = mach.getString(str, len);
+
+    fetch(url)
+      .then(response => response.arrayBuffer())
+      .then(buffer => new Uint8Array(buffer))
+      .then(strbuf => {
+        const memory = mach.wasm.exports.memory.buffer;
+        const outbuf = new Uint8Array(memory, mem, strbuf.byteLength);
+        for (let i = 0; i < strbuf.byteLength; i += 1) {
+          outbuf[i] = strbuf[i];
+        }
+        mach.wasm.exports.wasmFileFetchCb(frame);
+      });
+  },
 };
 
 export { mach };

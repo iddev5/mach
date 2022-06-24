@@ -214,7 +214,7 @@ export fn wasmInit() void {
     const allocator = gpa.allocator();
 
     engine = Engine.init(allocator) catch unreachable;
-    app.init(&engine) catch {};
+    nosuspend app.init(&engine) catch {};
 }
 
 export fn wasmUpdate() void {

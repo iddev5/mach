@@ -1,5 +1,6 @@
 const std = @import("std");
 const uri_parser = @import("uri_parser.zig");
+const Fetch = @import("Fetch.zig");
 
 const ResourceManager = @This();
 
@@ -8,12 +9,12 @@ paths: []const []const u8,
 // TODO: Use comptime hash map for resource_types
 resource_map: std.StringArrayHashMapUnmanaged(ResourceType) = .{},
 resources: std.StringHashMapUnmanaged(Resource) = .{},
-cwd: std.fs.Dir,
 context: ?*anyopaque = null,
+fetch: Fetch,
 
 pub fn init(allocator: std.mem.Allocator, paths: []const []const u8, resource_types: []const ResourceType) !ResourceManager {
-    var cwd = try std.fs.openDirAbsolute(try std.fs.selfExeDirPathAlloc(allocator), .{});
-    errdefer cwd.close();
+    var fetch = try Fetch.init(allocator);
+    errdefer fetch.deinit();
 
     var resource_map: std.StringArrayHashMapUnmanaged(ResourceType) = .{};
     for (resource_types) |res| {
@@ -24,7 +25,7 @@ pub fn init(allocator: std.mem.Allocator, paths: []const []const u8, resource_ty
         .allocator = allocator,
         .paths = paths,
         .resource_map = resource_map,
-        .cwd = cwd,
+        .fetch = fetch,
     };
 }
 
@@ -34,59 +35,58 @@ pub const ResourceType = struct {
     unload: fn (context: ?*anyopaque, resource: *anyopaque) void,
 };
 
-pub fn setLoadContext(self: *ResourceManager, ctx: anytype) void {
-    var context = self.allocator.create(@TypeOf(ctx)) catch unreachable;
+pub fn setLoadContext(resource_manager: *ResourceManager, ctx: anytype) void {
+    var context = resource_manager.allocator.create(@TypeOf(ctx)) catch unreachable;
     context.* = ctx;
-    self.context = context;
+    resource_manager.context = context;
 }
 
-pub fn getResource(self: *ResourceManager, uri: []const u8) !Resource {
-    if (self.resources.get(uri)) |res|
-        return res;
-
-    var file: ?std.fs.File = null;
+pub fn loadResource(resource_manager: *ResourceManager, uri: []const u8) !Resource {
     const uri_data = try uri_parser.parseUri(uri);
 
-    for (self.paths) |path| {
-        var dir = try self.cwd.openDir(path, .{});
-        defer dir.close();
+    var memory: ?[]const u8 = null;
+    for (resource_manager.paths) |path| {
+        const full_path = try std.fs.path.join(resource_manager.allocator, &.{ path, uri_data.path });
+        defer resource_manager.allocator.free(full_path);
 
-        file = dir.openFile(uri_data.path, .{}) catch |err| switch (err) {
+        var frame = async resource_manager.fetch.fetchFile(full_path);
+        memory = await frame catch |err| switch (err) {
             error.FileNotFound => continue,
-            else => return err,
+            else => |e| return e,
         };
-        errdefer file.deinit();
     }
 
-    if (file) |f| {
-        if (self.resource_map.get(uri_data.scheme)) |res_type| {
-            var data = try f.reader().readAllAlloc(self.allocator, std.math.maxInt(usize));
-            errdefer self.allocator.free(data);
-
-            const resource = try res_type.load(self.context, data);
-            errdefer res_type.unload(self.context, resource);
+    if (memory) |mem| {
+        if (resource_manager.resource_map.get(uri_data.scheme)) |res_type| {
+            const resource = try res_type.load(resource_manager.context, mem);
+            errdefer res_type.unload(resource_manager.context, resource);
 
             const res = Resource{
-                .uri = try self.allocator.dupe(u8, uri),
+                .uri = try resource_manager.allocator.dupe(u8, uri),
                 .resource = resource,
-                .size = data.len,
+                .size = mem.len,
             };
-            try self.resources.putNoClobber(self.allocator, uri, res);
+            try resource_manager.resources.putNoClobber(resource_manager.allocator, uri, res);
             return res;
         }
+
         return error.UnknownResourceType;
     }
 
     return error.ResourceNotFound;
 }
 
-pub fn unloadResource(self: *ResourceManager, res: Resource) void {
+pub fn getResource(resource_manager: *ResourceManager, uri: []const u8) ?Resource {
+    return resource_manager.resources.get(uri);
+}
+
+pub fn unloadResource(resource_manager: *ResourceManager, res: Resource) void {
     const uri_data = uri_parser.parseUri(res.uri) catch unreachable;
-    if (self.resource_map.get(uri_data.scheme)) |res_type| {
-        res_type.unload(self.context, res.resource);
+    if (resource_manager.resource_map.get(uri_data.scheme)) |res_type| {
+        res_type.unload(resource_manager.context, res.resource);
     }
 
-    _ = self.resources.remove(res.uri);
+    _ = resource_manager.resources.remove(res.uri);
 }
 
 pub const Resource = struct {
