@@ -398,6 +398,15 @@ pub const Surface = struct {
                         },
                         null,
                     );
+                } else if (utils.findChained(sysgpu.Surface.DescriptorFromXcbWindow, desc.next_in_chain.generic)) |x_desc| {
+                    break :blk try vki.createXcbSurfaceKHR(
+                        vk_instance,
+                        &vk.XcbSurfaceCreateInfoKHR{
+                            .connection = @ptrCast(x_desc.connection),
+                            .window = x_desc.window,
+                        },
+                        null,
+                    );
                 } else if (utils.findChained(sysgpu.Surface.DescriptorFromWaylandSurface, desc.next_in_chain.generic)) |wayland_desc| {
                     break :blk try vki.createWaylandSurfaceKHR(
                         vk_instance,

@@ -13,6 +13,7 @@ pub const Surface = opaque {
             from_windows_hwnd: *const DescriptorFromWindowsHWND,
             from_windows_swap_chain_panel: *const DescriptorFromWindowsSwapChainPanel,
             from_xlib_window: *const DescriptorFromXlibWindow,
+            from_xcb_window: *const DescriptorFromXcbWindow,
         };
 
         next_in_chain: NextInChain = .{ .generic = null },
@@ -59,6 +60,12 @@ pub const Surface = opaque {
     pub const DescriptorFromXlibWindow = extern struct {
         chain: ChainedStruct = .{ .next = null, .s_type = .surface_descriptor_from_xlib_window },
         display: *anyopaque,
+        window: u32,
+    };
+
+    pub const DescriptorFromXcbWindow = extern struct {
+        chain: ChainedStruct = .{ .next = null, .s_type = .surface_descriptor_from_xcb_window },
+        connection: *anyopaque,
         window: u32,
     };
 

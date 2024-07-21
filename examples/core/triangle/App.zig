@@ -19,6 +19,9 @@ pub fn deinit(game: *Mod) void {
 }
 
 fn init(game: *Mod, core: *mach.Core.Mod) !void {
+    // core.state().platform.setTitle("triangle");
+    // core.state().platform.setSize(.{ .width = 300, .height = 300 });
+
     // Create our shader module
     const shader_module = core.state().device.createShaderModuleWGSL("shader.wgsl", @embedFile("shader.wgsl"));
     defer shader_module.release();

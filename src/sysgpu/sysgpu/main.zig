@@ -424,6 +424,7 @@ pub const SType = enum(u32) {
     primitive_depth_clip_control = 0x00000007,
     surface_descriptor_from_wayland_surface = 0x00000008,
     surface_descriptor_from_android_native_window = 0x00000009,
+    surface_descriptor_from_xcb_window = 0x0000000A,
     surface_descriptor_from_windows_core_window = 0x0000000B,
     external_texture_binding_entry = 0x0000000C,
     external_texture_binding_layout = 0x0000000D,

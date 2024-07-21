@@ -14,6 +14,7 @@ const Frequency = @import("core/Frequency.zig");
 
 const Platform = switch (build_options.core_platform) {
     .x11 => @import("core/X11.zig"),
+    .xcb => @import("core/xcb.zig"),
     .wayland => @import("core/Wayland.zig"),
     .web => @panic("TODO: revive wasm backend"),
     .win32 => @import("core/win32.zig"),

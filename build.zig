@@ -274,6 +274,7 @@ pub fn build(b: *std.Build) !void {
 
 pub const Platform = enum {
     x11,
+    xcb,
     wayland,
     web,
     win32,

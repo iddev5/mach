@@ -20,6 +20,7 @@ pub const InstanceFunctions = vk.InstanceWrapper(&.{
             .createWaylandSurfaceKHR = builtin.target.os.tag == .linux,
             .createWin32SurfaceKHR = builtin.target.os.tag == .windows,
             .createXlibSurfaceKHR = builtin.target.os.tag == .linux,
+            .createXcbSurfaceKHR = builtin.target.os.tag == .linux,
             .destroyInstance = true,
             .destroySurfaceKHR = true,
             .enumerateDeviceExtensionProperties = true,
